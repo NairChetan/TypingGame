@@ -1,105 +1,125 @@
 document.addEventListener('DOMContentLoaded', () => {
     const gameContainer = document.getElementById('game-container');
-    const caughtLettersContainer = document.getElementById('caught-letters');
-    const basket = document.getElementById('basket');
     const timerDisplay = document.getElementById('timer');
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    const vowels = 'AEIOU';
-    const gameDuration = 20000; // 20 seconds
-    const letterInterval = 1000; // Create a new letter every second
-    let fallenLetters = new Set();
-    let caughtLetters = [];
-    let vowelsCount = 0;
+    const resultContainer = document.getElementById('result');
+    const resultText = document.getElementById('result-text');
+    const pressedCountDisplay = document.getElementById('pressed-count');
+    const missedCountDisplay = document.getElementById('missed-count');
+    const wrongCountDisplay = document.getElementById('wrong-count');
+    const difficultySelection = document.getElementById('difficulty-selection');
+    const easyBtn = document.getElementById('easy-btn');
+    const moderateBtn = document.getElementById('moderate-btn');
+    const hardBtn = document.getElementById('hard-btn');
+    const playAgainBtn = document.getElementById('play-again-btn');
+    const backToLevelSelectionBtn = document.getElementById('back-to-level-selection-btn');
+
+    let letters = [];
+    let gameDuration = 20000; // 20 seconds
+    let letterInterval = 1000; // Create a new letter every second
+    let fallenLetters = []; // Array to store active letters
+    let pressedCount = 0;
+    let missedCount = 0;
+    let wrongCount = 0;
     let intervalId;
     let timerId;
+    let startTime;
+    let gameEnded = false; // Flag to check if the game has ended
 
-    const wordEntryContainer = document.getElementById('word-entry-container');
-    const wordTimerDisplay = document.getElementById('word-timer');
-    const inputWords = document.getElementById('input-words');
-    const submitWordsButton = document.getElementById('submit-words');
-    const shuffleLettersButton = document.getElementById('shuffle-letters');
-    const scoreDisplay = document.getElementById('score');
-    const errorDisplay = document.getElementById('error');
-    const validWordsContainer = document.getElementById('valid-words');
-    let wordEntryTimeLeft = 60; // 120 seconds for word entry
-    let wordEntryInterval;
-    let totalScore = 0;
-    let scoredWords = new Set(); // Keep track of words already scored
+    easyBtn.addEventListener('click', () => {
+        setDifficulty('easy');
+    });
 
-    function createFallingLetter(letter) {
-        const letterElement = document.createElement('div');
-        const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
-        letterElement.style.color = randomColor; 
-        const inverseColor = invertColor(randomColor);
-        letterElement.style.backgroundColor = inverseColor; // Set the background color
-        letterElement.textContent = letter;
-        letterElement.classList.add('letter');
-        gameContainer.appendChild(letterElement);
-        const isVowel = vowels.includes(letter);
-        const speed = isVowel ? Math.random() * 2 + 2 : Math.random() * 2 + 3; // Vowels: 1-3s, Consonants: 3-8s
-        letterElement.style.animationDuration = `${speed}s`;
-        letterElement.style.left = `${Math.random() * 90}%`; // Random horizontal position
+    moderateBtn.addEventListener('click', () => {
+        setDifficulty('moderate');
+    });
 
-        // Remove letter after animation ends and check if caught
-        letterElement.addEventListener('animationiteration', () => {
-            fallenLetters.delete(letter);
-            letterElement.remove();
-        });
-        letterElement.addEventListener('animationend', () => {
-            const basketRect = basket.getBoundingClientRect();
-            const letterRect = letterElement.getBoundingClientRect();
-            if (
-                letterRect.bottom >= basketRect.top &&
-                letterRect.left >= basketRect.left &&
-                letterRect.right <= basketRect.right
-            ) {
-                caughtLetters.push(letter);
-                letterElement.remove(); // Remove the letter immediately when caught
-            }
-        });
+    hardBtn.addEventListener('click', () => {
+        setDifficulty('hard');
+    });
+
+    playAgainBtn.addEventListener('click', () => {
+        resetGame();
+        startGame();
+    });
+
+    backToLevelSelectionBtn.addEventListener('click', () => {
+        resetGame();
+        difficultySelection.classList.remove('d-none');
+        resultContainer.style.display = 'none';
+    });
+
+    function setDifficulty(difficulty) {
+        switch (difficulty) {
+            case 'easy':
+                letters = ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', '\''];
+                gameDuration = 20000;
+                letterInterval = 1000;
+                break;
+            case 'moderate':
+                letters = ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', '\'', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']'];
+                gameDuration = 20000;
+                letterInterval = 900;
+                break;
+            case 'hard':
+                letters = ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', '\'', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', 'Z', 'X', 'C', 'V', 'B', 'N', 'M'];
+                gameDuration = 20000;
+                letterInterval = 800;
+                break;
+            default:
+                break;
+        }
+
+        startGame();
     }
 
-    function startFallingLetters() {
+    function startGame() {
+        difficultySelection.classList.add('d-none');
+        gameContainer.classList.remove('d-none');
+
+        gameEnded = false; // Reset game ended flag
+
         intervalId = setInterval(() => {
-            if (fallenLetters.size >= letters.length || (Date.now() - startTime > gameDuration && vowelsCount >= 3)) {
+            if (fallenLetters.length >= letters.length || gameEnded) {
                 clearInterval(intervalId);
-                setTimeout(endGame, 2000); // End game after a short delay
+                setTimeout(endGame, 2000);
                 return;
             }
 
-            let randomIndex = Math.floor(Math.random() * letters.length);
-            let randomLetter = letters[randomIndex];
+            const randomIndex = Math.floor(Math.random() * letters.length);
+            const randomLetter = letters[randomIndex];
 
-            // Ensure at least 3 vowels fall
-            if (vowelsCount < 3) {
-                randomLetter = vowels[Math.floor(Math.random() * vowels.length)];
-                if (!fallenLetters.has(randomLetter)) {
-                    vowelsCount++;
-                }
-            }
-
-            if (!fallenLetters.has(randomLetter)) {
-                createFallingLetter(randomLetter);
-                fallenLetters.add(randomLetter);
-            }
+            createFallingLetter(randomLetter);
         }, letterInterval);
 
-        setTimeout(() => {
-            clearInterval(intervalId);
-        }, gameDuration);
+        startTime = Date.now();
+        timerId = setInterval(updateTimer, 1000); // Update timer every second
     }
 
-    function showCaughtLetters() {
-        caughtLettersContainer.textContent = '';
-        caughtLetters.forEach(letter => {
-            const letterBox = document.createElement('div');
-            letterBox.textContent = letter;
-            letterBox.classList.add('letter-box');
-            letterBox.addEventListener('click', () => {
-                inputWords.value += letter;
-            });
-            caughtLettersContainer.appendChild(letterBox);
+    function createFallingLetter(letter) {
+        const letterElement = document.createElement('div');
+        const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+        letterElement.style.color = randomColor;
+        const inverseColor = invertColor(randomColor);
+        letterElement.style.backgroundColor = inverseColor;
+        letterElement.textContent = letter;
+        letterElement.classList.add('letter');
+        gameContainer.appendChild(letterElement);
+        letterElement.style.animationDuration = `${Math.random() * 2 + 3}s`;
+        letterElement.style.left = `${Math.random() * 90}%`;
+
+        letterElement.addEventListener('animationend', () => {
+            if (!letterElement.classList.contains('burst')) {
+                missedCount++;
+                updateMissedCount();
+            }
+            const index = fallenLetters.indexOf(letterElement);
+            if (index !== -1) {
+                fallenLetters.splice(index, 1);
+            }
+            letterElement.remove();
         });
+
+        fallenLetters.push(letterElement);
     }
 
     function updateTimer() {
@@ -107,154 +127,98 @@ document.addEventListener('DOMContentLoaded', () => {
         timerDisplay.textContent = timeLeft;
         if (timeLeft <= 0) {
             clearInterval(timerId);
+            clearInterval(intervalId); // Stop creating new letters
+            endGame();
         }
     }
 
     function endGame() {
-        basket.style.display = 'none';
-        showCaughtLetters();
-        wordEntryContainer.style.display = 'block';
-        startWordEntryTimer();
+        if (gameEnded) return; // Ensure endGame is only called once
+        gameEnded = true;
+
+        fallenLetters.forEach(letterElement => {
+            letterElement.remove();
+        });
+        fallenLetters = []; // Clear the array
+        showResult();
     }
 
-    function startWordEntryTimer() {
-        wordEntryInterval = setInterval(updateWordEntryTimer, 1000);
+    function showResult() {
+        resultContainer.style.display = 'block';
+        resultText.innerHTML = `
+            <h3 class="correct">Correct: ${pressedCount}</h3>
+            <h3 class="wrong">Wrong: ${wrongCount}</h3>
+            <h3 class="missed">Missed: ${missedCount}</h3>
+        `;
     }
 
-    function updateWordEntryTimer() {
-        wordEntryTimeLeft--;
-        wordTimerDisplay.textContent = wordEntryTimeLeft;
-        if (wordEntryTimeLeft <= 0) {
-            clearInterval(wordEntryInterval);
-            inputWords.disabled = true;
-            submitWordsButton.disabled = true;
-            shuffleLettersButton.disabled = true; // Disable shuffle button when time is up
-            calculateFinalScore();
-        }
+    function updateMissedCount() {
+        missedCountDisplay.textContent = `Missed: ${missedCount}`;
     }
 
-    inputWords.addEventListener('keypress', (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            submitWord();
-        }
-    });
-
-    function shuffleCaughtLetters() {
-        caughtLetters = caughtLetters.sort(() => Math.random() - 0.5);
-        showCaughtLetters();
+    function updatePressedCount() {
+        pressedCountDisplay.textContent = `Correct: ${pressedCount}`;
     }
 
-    shuffleLettersButton.addEventListener('click', () => {
-        shuffleCaughtLetters();
-    });
-
-    submitWordsButton.addEventListener('click', submitWord);
-
-    function submitWord() {
-        const word = inputWords.value.trim();
-        if (word.length > 1) { // Word length should be 2 letters minimum
-            calculateScore(word);
-            inputWords.value = '';
-        } else {
-            errorDisplay.textContent = 'Word must be at least 2 letters long';
-        }
+    function updateWrongCount() {
+        wrongCountDisplay.textContent = `Wrong: ${wrongCount}`;
     }
 
-    async function calculateScore(word) {
-        if (scoredWords.has(word.toUpperCase())) {
-            errorDisplay.textContent = `Word already used: ${word}`;
-            return;
-        }
+    function resetGame() {
+        pressedCount = 0;
+        missedCount = 0;
+        wrongCount = 0;
+        updatePressedCount();
+        updateMissedCount();
+        updateWrongCount();
+        resultContainer.style.display = 'none';
+        gameContainer.classList.add('d-none');
+        fallenLetters = [];
+        gameEnded = false;
+    }
 
-        const isValid = await validateWord(word);
-        if (isValid) {
-            let valid = true;
-            for (let letter of word.toUpperCase()) {
-                if (!caughtLetters.includes(letter)) {
-                    valid = false;
-                    break;
-                }
+    document.addEventListener('keydown', (event) => {
+        const pressedKey = event.key.toUpperCase();
+        let found = false;
+        for (let i = 0; i < fallenLetters.length; i++) {
+            const letterElement = fallenLetters[i];
+            if (letterElement.textContent === pressedKey) {
+                letterElement.classList.add('burst');
+                createExplosionEffect(letterElement);
+                setTimeout(() => {
+                    letterElement.remove();
+                    pressedCount++;
+                    updatePressedCount();
+                }, 500); // Wait for burst animation to finish
+                found = true;
+                break; // Exit loop after finding the letter
             }
-            if (valid) {
-                totalScore += word.length;
-                scoreDisplay.textContent = `Score: ${totalScore}`;
-                errorDisplay.textContent = ''; // Clear any previous error message
-                scoredWords.add(word.toUpperCase()); // Mark word as scored
-                displayValidWord(word); // Display the valid word
-            } else {
-                errorDisplay.textContent = `Invalid word using caught letters: ${word}`;
-            }
-        } else {
-            errorDisplay.textContent = `Invalid word: ${word}`;
         }
-    }
-
-    async function validateWord(word) {
-        try {
-            const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-            if (!response.ok) throw new Error('Word not found');
-            const data = await response.json();
-            return data.length > 0;
-        } catch (error) {
-            console.error(`Error validating word "${word}":`, error);
-            return false;
+        if (!found) {
+            wrongCount++;
+            updateWrongCount();
         }
-    }
-
-    function calculateFinalScore() {
-        scoreDisplay.textContent = `Final Score: ${totalScore}`;
-        setTimeout(()=>{
-            function senddata() {
-                const final_score_scoreboard = `${totalScore}`
-                localStorage.setItem('myData',final_score_scoreboard);
-                window.location.href = '../Score/Score.html'
-            }
-            senddata();
-        },1000)
-    }
-
-    function displayValidWord(word) {
-        const wordUppercase = word.toUpperCase();
-        const wordElement = document.createElement('li');
-        wordElement.textContent = wordUppercase;
-        validWordsContainer.appendChild(wordElement);
-    }
-
-    // Move basket with mouse
-    document.addEventListener('mousemove', (event) => {
-        const basketWidth = basket.offsetWidth;
-        const containerRect = gameContainer.getBoundingClientRect();
-        let newLeft = event.clientX - containerRect.left - basketWidth / 2;
-        newLeft = Math.max(0, Math.min(newLeft, containerRect.width - basketWidth));
-        basket.style.left = `${newLeft}px`;
     });
 
-    const startTime = Date.now();
-    startFallingLetters();
-    timerId = setInterval(updateTimer, 1000); // Update timer every second
-
-    // Add event listener to the button
-    const gotoNextGameButton = document.getElementById('goto-next-game');
-    gotoNextGameButton.addEventListener('click', () => {
-        // Redirect to the linked game
-        window.location.href = '../WordFinder/Home.html';
-    });
     function invertColor(hex) {
         if (hex.indexOf('#') === 0) {
             hex = hex.slice(1);
         }
-        // Convert hex to RGB
         const r = (255 - parseInt(hex.slice(0, 2), 16)).toString(16);
         const g = (255 - parseInt(hex.slice(2, 4), 16)).toString(16);
         const b = (255 - parseInt(hex.slice(4, 6), 16)).toString(16);
-    
-        // Combine RGB values and return the inverse color
         return "#" + padZero(r) + padZero(g) + padZero(b);
     }
-    
-    // Function to pad zeros
+
     function padZero(str) {
         return str.length === 1 ? "0" + str : str;
+    }
+
+    function createExplosionEffect(letterElement) {
+        letterElement.innerHTML = '<div class="spinner-grow text-danger" role="status"><span class="sr-only">Loading...</span></div>';
+        letterElement.style.animation = 'none';
+        setTimeout(() => {
+            letterElement.innerHTML = ''; // Clear the inner content after explosion
+        }, 500); // Match the duration with the spinner animation
     }
 });

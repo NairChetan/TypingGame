@@ -2,12 +2,21 @@
     padding: 0;
     box-sizing: border-box;
 }
+
 body {
     background-image: url('../Assets/signuppage.png');
     background-size: cover;
     background-position: center;
     height: 100vh;
     margin: 0;
+    font-family: Arial, sans-serif; /* Set a fallback font family */
+}
+
+.container-fluid {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #game-container {
@@ -28,54 +37,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* border: 1px solid #333; */
-    /* background-color: #fff; */
     animation: fall linear forwards;
-}
-
-#basket {
-    background-image: url(../Assets/basket.png);
-    background-size: 105%;
-    /* background:no-repeat; */
-    background: cover;
-    width: 70px;
-    height: 60px;
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    /* background-color: brown; */
-    /* border: 2px solid black; */
-    z-index: 2; /* Ensure basket is above letters */
-}
-
-#caught-letters {
-    position: absolute;
-    bottom: 65%;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.letter-box {
-    width: 30px;
-    height: 30px;
-    /* border: 1px solid #333; */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 05px;
-    cursor: pointer;
-}
-
-.letter-box:hover {
-    background-color: #eee;
-}
-
-.highlight {
-    background-color: #ffcc00;
+    border-radius: 50%;
 }
 
 #timer {
@@ -83,7 +46,7 @@ body {
     top: 10px;
     right: 10px;
     font-size: 2em;
-    z-index: 3; /* Ensure timer is above everything */
+    z-index: 3;
     color: white;
 }
 
@@ -96,108 +59,63 @@ body {
     }
 }
 
-/* Additional CSS for letter inside basket */
-.letter.inside-basket {
-    opacity: 0; /* Hide the letter */
+.burst {
+    animation: burst 0.5s forwards;
 }
 
-/* Add styles for the button */
-#goto-next-game {
+/* Result Display Styles */
+#result {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+#result-text {
     margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 16px;
+}
+
+.correct {
+    color: green;
+    font-weight: bold;
+}
+
+.wrong {
+    color: red;
+    font-weight: bold;
+}
+
+.missed {
+    color: orange;
+    font-weight: bold;
+}
+
+/* Difficulty Selection Styles */
+#difficulty-selection {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.btn-primary {
     background-color: #007bff;
     color: #fff;
     border: none;
-    border-radius: 5px;
-    cursor: pointer;
 }
 
-#goto-next-game:hover {
-    background-color: #0056b3;
+.btn-primary:hover {
+    background-color: #0069d9;
+    color: #fff;
 }
 
-#word-entry-container {
-    position: relative;
-    bottom:480px;
-    text-align: center;
-    margin: 20px;
-    align-items: center;
-
-}
-
-#input-words {
-    position: relative;
-    left:320px;
-    align-items: center;
-    width: 50%;
-    padding: 10px;
-    margin: 10px 0;
-    text-align: center;
-}
-
-#submit-words {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-
-#submit-words:hover {
-    background-color: #218838;
-}
-
-#shuffle-letters {
-    position: relative;
-    left:10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #ffc107;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-
-#shuffle-letters:hover {
-    background-color: #e0a800;
-}
-
-#error {
-    position: relative;
-    top:30px;
-    color: red;
-    font-size: 16px;
-    margin-top: 10px;
-}
-
-#score {
-    position: relative;
-    top:45px;
-    margin-top: 30px;
-    font-size: 18px;
-    color: #007bff;
-}
-#valid-words {
-    display: grid;
-    grid-template-columns: repeat(3,1fr);
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-    padding-top: 40px;
-    /* font-style: bold; */
-    font-weight: bolder;
-}
-#valid-words li {
-
-    list-style-type: none;
-    padding: 1px;
-    width: 300px;
-    border:none;
-    margin-top: 1px;
-    border-radius: 5px;
-    font-size: 1.2em;
-    height: 30px;
-    
+.btn-primary:focus {
+    box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5);
 }
