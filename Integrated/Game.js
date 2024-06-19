@@ -154,14 +154,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateMissedCount() {
         missedCountDisplay.textContent = `Missed: ${missedCount}`;
+        missedCountDisplay.style.display = 'none';
     }
 
     function updatePressedCount() {
         pressedCountDisplay.textContent = `Correct: ${pressedCount}`;
+        pressedCountDisplay.style.display = 'none';
     }
 
     function updateWrongCount() {
         wrongCountDisplay.textContent = `Wrong: ${wrongCount}`;
+        wrongCountDisplay.style.display = 'none';
     }
 
     function resetGame() {
