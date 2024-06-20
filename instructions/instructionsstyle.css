@@ -33,9 +33,15 @@ body {
   height: 350px;
   margin-left: 10%;
   font-family: "Exo 2", sans-serif;
-  font-size: 25px;
+  font-size: 14px;
   color: #604131;
   justify-content: space-between;
+}
+
+.rules img{
+  width: 650px;
+  height: 220px;
+  margin-top: 10px;
 }
 .loginsignup {
   margin-top: 150px;

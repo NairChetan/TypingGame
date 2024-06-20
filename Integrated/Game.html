@@ -1,54 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Letter Fall</title>
-    <link rel="stylesheet" href="Game.css" />
-    <!-- Bootstrap CSS -->
-    <link
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <div
-      id="game-container"
-      class="container-fluid d-flex justify-content-center align-items-center"
-    >
-      <div id="basket"></div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Letter Fall</title>
+  <link rel="stylesheet" href="Game.css" />
+  <!-- Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+
+<body>
+
+  <div class="container-fluid d-flex justify-content-center align-items-center">
+
+    <div id="difficulty-selection">
+      <h2 class="text-center mb-4">Choose Difficulty Level</h2>
+      <div class="text-center mb-3">
+        <button id="easy-btn" class="btn btn-primary btn-lg mr-3">Easy</button>
+        <button id="moderate-btn" class="btn btn-primary btn-lg mr-3">Moderate</button>
+        <button id="hard-btn" class="btn btn-primary btn-lg">Hard</button>
+      </div>
+    </div>
+
+    <div id="game-container" class="d-none">
       <div id="timer" class="position-absolute top-0 end-0 m-3">20</div>
     </div>
-    <div id="caught-letters" class="d-flex justify-content-center mt-3"></div>
-    <div
-      id="word-entry-container"
-      class="text-center mt-3"
-      style="display: none"
-    >
-      <p>Time left to enter words: <span id="word-timer">60</span>s</p>
-      <input
-        type="text"
-        id="input-words"
-        class="form-control"
-        placeholder="Enter words here"
-      />
-      <button id="submit-words" class="btn btn-success mt-2">Submit</button>
-      <button id="shuffle-letters" class="btn btn-warning mt-2">
-        Shuffle Letters
-      </button>
-      <p id="score" class="mt-3"></p>
-      <p id="error" class="text-danger"></p>
-      <ul id="valid-words" class="mt-3"></ul>
-      <!-- New container for valid words -->
+
+    <div id="result" class="text-center mt-3" style="display: none">
+      <p id="pressed-count">Pressed: 0</p>
+      <p id="missed-count">Missed: 0</p>
+      <p id="wrong-count">Wrong: 0</p>
+      <div id="result-text"></div>
+      <button id="play-again-btn" class="btn btn-success mt-3">Play Again</button>
+      <button id="back-to-level-selection-btn" class="btn btn-secondary mt-3">Back to Level Selection</button>
     </div>
 
     <audio autoplay loop>
       <source src="../Audio/backgroundSound.mp3" type="audio/mpeg" />
     </audio>
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="Game.js"></script>
-  </body>
+
+  </div>
+
+  <!-- Bootstrap JS and dependencies -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  
+  <script src="Game.js"></script>
+
+</body>
 </html>
